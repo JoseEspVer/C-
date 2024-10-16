@@ -1,0 +1,124 @@
+import heapq
+
+class Graph:
+    def __init__(self, n, edges):
+        self.n = n
+        self.graph = {i: [] for i in range(n)}
+        for from_node, to_node, cost in edges:
+            self.graph[from_node].append((cost, to_node))
+    
+    def addEdge(self, edge):
+        from_node, to_node, cost = edge
+        self.graph[from_node].append((cost, to_node))
+
+    def shortestPath(self, node1, node2):
+        # Distancia mínima de node1 a todos los otros nodos
+        min_distance = {i: float('inf') for i in range(self.n)}
+        min_distance[node1] = 0
+        # Min-heap para gestionar los nodos a explorar
+        priority_queue = [(0, node1)]
+        
+        while priority_queue:
+            current_distance, current_node = heapq.heappop(priority_queue)
+            
+            # Si encontramos el nodo destino, devolvemos el costo
+            if current_node == node2:
+                return current_distance
+            
+            # Si ya hemos encontrado un camino más corto, continuamos
+            if current_distance > min_distance[current_node]:
+                continue
+            
+            # Explorar vecinos
+            for cost, neighbor in self.graph[current_node]:
+                distance = current_distance + cost
+                # Solo consideramos este nuevo camino si es más corto
+                if distance < min_distance[neighbor]:
+                    min_distance[neighbor] = distance
+                    heapq.heappush(priority_queue, (distance, neighbor))
+        
+        return -1 if min_distance[node2] == float('inf') else min_distance[node2]
+
+# Ejemplo de uso
+edges = [
+    (0, 1, 2),
+    (1, 2, 6),
+    (2, 3, 3),
+    (3, 4, 2),
+    (4, 5, 6),
+    (3, 5, 1),
+    (0, 3, 1),
+    (3, 6, 4),
+    (4, 6, 2)
+]
+graph = Graph(7, edges)
+print(graph.shortestPath(0, 6))  # Ejemplo de salida: 5
+graph.addEdge((1, 3, 1))
+print(graph.shortestPath(0, 6))  # Ejemplo de salida con nueva arista: 5
+
+
+
+class ListNode:
+    def __init__(self, x):
+        self.val = x
+        self.next = None
+
+class TreeNode:
+    def __init__(self, x):
+        self.val = x
+        self.left = None
+        self.right = None
+
+def sortedListToBST(head):
+    # Función para encontrar el tamaño de la lista enlazada
+    def findSize(head):
+        pointer = head
+        size = 0
+        while pointer:
+            size += 1
+            pointer = pointer.next
+        return size
+
+    # Función recursiva para convertir la lista en BST
+    def convertListToBST(left, right):
+        nonlocal head
+        if left > right:
+            return None
+
+        mid = (left + right) // 2
+        # Construye primero el subárbol izquierdo
+        left_child = convertListToBST(left, mid - 1)
+
+        # El nodo actual se convierte en la raíz
+        root = TreeNode(head.val)
+        root.left = left_child
+
+        # Mover al siguiente nodo de la lista
+        head = head.next
+
+        # Construir el subárbol derecho
+        root.right = convertListToBST(mid + 1, right)
+        return root
+
+    size = findSize(head)
+    return convertListToBST(0, size - 1)
+
+# Código para probar la función con una lista enlazada
+def printInOrder(root):
+    if not root:
+        return
+    printInOrder(root.left)
+    print(root.val, end=' ')
+    printInOrder(root.right)
+
+# Creación de la lista enlazada
+node_list = [-10, -3, 0, 5, 9]
+head = ListNode(node_list[0])
+current = head
+for value in node_list[1:]:
+    current.next = ListNode(value)
+    current = current.next
+
+# Convertir a BST y mostrar el resultado
+bst_root = sortedListToBST(head)
+printInOrder(bst_root)  # Salida esperada: -10 -3 0 5 9
